@@ -4,3 +4,5 @@
 
 go.work
 go.work.sum
+go.mod
+go.sum
