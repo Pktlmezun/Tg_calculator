@@ -2,18 +2,11 @@ package utils
 
 import (
 	"strconv"
-	"strings"
 	"unicode"
 )
 
-import "regexp"
-
-var validExpr = regexp.MustCompile(`^[\d\s+\-*/()]+$`)
-
 func Calculate(expr string) int {
-	if strings.TrimSpace(expr) == "" || !validExpr.MatchString(expr) {
-		return 0
-	}
+
 	var numStack []int
 	var opStack []rune
 	priority := map[rune]int{

@@ -6,9 +6,18 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 	"tg_calculator/utils"
 )
+
+var numericKeyboard = tgbotapi.NewReplyKeyboard(
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("help"),
+	),
+)
+var validExpr = regexp.MustCompile(`^[\d\s+\-*/()]+$`)
 
 func main() {
 
@@ -34,13 +43,46 @@ func main() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message != nil {
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-			ans := strconv.Itoa(utils.Calculate(update.Message.Text))
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, ans)
-			msg.ReplyToMessageID = update.Message.MessageID
+		if update.Message == nil {
+			continue
+		}
 
+		if !update.Message.IsCommand() {
+			var ans string
+
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			if update.Message.Text == "help" {
+				ans = utils.HelpMsg
+			} else if strings.TrimSpace(update.Message.Text) == "" || !validExpr.MatchString(update.Message.Text) {
+				ans = utils.InvalidSyntaxMsg
+			} else {
+				ans = strconv.Itoa(utils.Calculate(update.Message.Text))
+			}
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, ans)
+			msg.ParseMode = "MarkdownV2"
+			msg.ReplyToMessageID = update.Message.MessageID
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 			bot.Send(msg)
+			continue
+		}
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
+		switch update.Message.Command() {
+		case "start":
+			msg.Text = utils.StartMsg
+			msg.ReplyMarkup = numericKeyboard
+		case "help":
+			msg.Text = utils.HelpMsg
+			msg.ParseMode = "MarkdownV2"
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		default:
+			msg.Text = utils.DefaultMsg
+			msg.ReplyMarkup = numericKeyboard
+		}
+
+		if _, err := bot.Send(msg); err != nil {
+			log.Panic(err)
 		}
 	}
 }
