@@ -1,72 +1,48 @@
 package utils
 
 import (
-	"strconv"
-	"unicode"
+	"fmt"
+	"github.com/Knetic/govaluate"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log"
 )
 
-func Calculate(expr string) int {
+func EvaluateExpression(update tgbotapi.Update) tgbotapi.MessageConfig {
+	log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-	var numStack []int
-	var opStack []rune
-	priority := map[rune]int{
-		'+': 1, '-': 1,
-		'*': 2, '/': 2,
+	ans, parseMode := calculate(update.Message.Text)
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, ans)
+	msg.ReplyToMessageID = update.Message.MessageID
+	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+
+	if parseMode {
+		msg.ParseMode = "MarkdownV2"
 	}
+	return msg
+}
 
-	eval := func() {
-		b := numStack[len(numStack)-1]
-		numStack = numStack[:len(numStack)-1]
-		a := numStack[len(numStack)-1]
-		numStack = numStack[:len(numStack)-1]
-		op := opStack[len(opStack)-1]
-		opStack = opStack[:len(opStack)-1]
-
-		switch op {
-		case '+':
-			numStack = append(numStack, a+b)
-		case '-':
-			numStack = append(numStack, a-b)
-		case '*':
-			numStack = append(numStack, a*b)
-		case '/':
-			numStack = append(numStack, a/b)
-		}
+func calculate(s string) (string, bool) {
+	var ans string
+	parseMode := false
+	if s == "help" {
+		return HelpMsg, true
 	}
-
-	for i := 0; i < len(expr); i++ {
-		ch := rune(expr[i])
-		if ch == ' ' {
-			continue
-		}
-		if unicode.IsDigit(ch) {
-			n := 0
-			for i < len(expr) && unicode.IsDigit(rune(expr[i])) {
-				digit, _ := strconv.Atoi(string(expr[i]))
-				n = n*10 + digit
-				i++
-			}
-			i--
-			numStack = append(numStack, n)
-		} else if ch == '(' {
-			opStack = append(opStack, ch)
-		} else if ch == ')' {
-			for opStack[len(opStack)-1] != '(' {
-				eval()
-			}
-			opStack = opStack[:len(opStack)-1]
+	expr, err := govaluate.NewEvaluableExpression(s)
+	if err != nil {
+		log.Printf("syntax error: %s\n", err.Error())
+		ans = InvalidSyntaxMsg
+		parseMode = true
+	} else {
+		parameters := make(map[string]interface{})
+		res, err := expr.Evaluate(parameters)
+		if err != nil {
+			log.Printf("evaluate error: %s\n", err.Error())
+			ans = InvalidSyntaxMsg
+			parseMode = true
 		} else {
-			for len(opStack) > 0 && opStack[len(opStack)-1] != '(' &&
-				priority[opStack[len(opStack)-1]] >= priority[ch] {
-				eval()
-			}
-			opStack = append(opStack, ch)
+			ans = fmt.Sprintf("%v", res)
 		}
 	}
-
-	for len(opStack) > 0 {
-		eval()
-	}
-
-	return numStack[len(numStack)-1]
+	return ans, parseMode
 }
