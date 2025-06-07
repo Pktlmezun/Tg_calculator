@@ -3,11 +3,11 @@ package main
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
-	"tg_calculator/bot"
+	"tg_calculator/utils"
 )
 
 func main() {
-	updates, bot := utils.Load()
+	updates, tgBot := bot.Load()
 
 	for update := range updates {
 		if update.Message == nil {
@@ -16,11 +16,11 @@ func main() {
 		var msg tgbotapi.MessageConfig
 
 		if !update.Message.IsCommand() {
-			msg = utils.EvaluateExpression(update)
+			msg = bot.EvaluateExpression(update)
 		} else {
-			msg = utils.Command(update)
+			msg = bot.Command(update)
 		}
-		if _, err := bot.Send(msg); err != nil {
+		if _, err := tgBot.Send(msg); err != nil {
 			log.Panic(err)
 		}
 	}

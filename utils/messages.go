@@ -1,4 +1,4 @@
-package utils
+package bot
 
 const (
 	invalidSyntaxMsg = `❌ Invalid expression\. Please use only digits, \+ \- \* / and parentheses\.
