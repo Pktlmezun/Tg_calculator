@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for tg-calculator on 2025-06-07T05:56:46+05:00
+# fly.toml app configuration file generated for tg-calculator on 2025-06-07T06:26:06+05:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -7,11 +7,6 @@ app = 'tg-calculator'
 primary_region = 'fra'
 
 [build]
-  [build.args]
-    GO_VERSION = '1.23'
-
-[env]
-  PORT = '8080'
 
 [http_service]
   internal_port = 8080
