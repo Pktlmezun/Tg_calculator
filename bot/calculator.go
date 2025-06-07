@@ -26,19 +26,19 @@ func calculate(s string) (string, bool) {
 	var ans string
 	parseMode := false
 	if s == "help" {
-		return HelpMsg, true
+		return helpMsg, true
 	}
 	expr, err := govaluate.NewEvaluableExpression(s)
 	if err != nil {
 		log.Printf("syntax error: %s\n", err.Error())
-		ans = InvalidSyntaxMsg
+		ans = invalidSyntaxMsg
 		parseMode = true
 	} else {
 		parameters := make(map[string]interface{})
 		res, err := expr.Evaluate(parameters)
 		if err != nil {
 			log.Printf("evaluate error: %s\n", err.Error())
-			ans = InvalidSyntaxMsg
+			ans = invalidSyntaxMsg
 			parseMode = true
 		} else {
 			ans = fmt.Sprintf("%v", res)

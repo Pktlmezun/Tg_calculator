@@ -13,14 +13,14 @@ func Command(update tgbotapi.Update) tgbotapi.MessageConfig {
 
 	switch update.Message.Command() {
 	case "start":
-		msg.Text = StartMsg
+		msg.Text = startMsg
 		msg.ReplyMarkup = numericKeyboard
 	case "help":
-		msg.Text = HelpMsg
+		msg.Text = helpMsg
 		msg.ParseMode = "MarkdownV2"
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 	default:
-		msg.Text = DefaultMsg
+		msg.Text = defaultMsg
 		msg.ReplyMarkup = numericKeyboard
 	}
 	return msg

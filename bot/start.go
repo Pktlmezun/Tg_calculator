@@ -3,18 +3,13 @@ package utils
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/joho/godotenv"
 	"log"
-	"os"
+	"tg_calculator/config"
 )
 
 func Load() (tgbotapi.UpdatesChannel, *tgbotapi.BotAPI) {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	token := os.Getenv("TELEGRAM_TOKEN")
-	bot, err := tgbotapi.NewBotAPI(token)
+	conf := config.LoadConfig()
+	bot, err := tgbotapi.NewBotAPI(conf.TelegramToken)
 
 	if err != nil {
 		fmt.Println("panicking")

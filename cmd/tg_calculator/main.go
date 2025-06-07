@@ -3,7 +3,7 @@ package main
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
-	"tg_calculator/utils"
+	"tg_calculator/bot"
 )
 
 func main() {
